@@ -7,7 +7,6 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    // CHANGED: use GridGenerator3D instead of GridGenerator
     public GridGenerator3D gridGenerator;
 
     [Header("Wave Settings")]
@@ -18,7 +17,7 @@ public class GameManager : MonoBehaviour
     private List<RockTile> activeTiles;
 
     public GameObject treasureChestPrefab; // Assign in Inspector
-    public WaveTimer3D waveTimer; // Reference to timer UI
+    public WaveTimer3D waveTimer;          // Reference to timer UI
 
     // Spawn a treasure chest at a random remaining tile after wave 2
     private void SpawnTreasureChest()
@@ -33,10 +32,12 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("No remaining tiles to spawn treasure chest.");
             return;
         }
-        // Pick a random tile from the remaining active rock tiles
+
+        // Pick a random tile from the remaining active rock tiles (still bricks)
         var tile = activeTiles[Random.Range(0, activeTiles.Count)];
         Vector3 spawnPos = tile.transform.position + Vector3.up * 0.5f; // slight offset above tile
         Instantiate(treasureChestPrefab, spawnPos, Quaternion.identity);
+        Debug.Log("[GameManager] Treasure chest spawned.");
     }
 
     void Awake()
@@ -47,7 +48,6 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // Auto-find references if missing
         if (gridGenerator == null) gridGenerator = FindObjectOfType<GridGenerator3D>();
         if (waveTimer == null) waveTimer = FindObjectOfType<WaveTimer3D>();
 
@@ -58,17 +58,13 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("GameLoop Started. Waiting for grid...");
 
-        // Wait until grid exists and has tiles, instead of fixed 1 second
-        float timeout = 15f;    // safety timeout (seconds)
+        float timeout = 15f;
         float elapsed = 0f;
 
         while (true)
         {
             if (gridGenerator == null)
-            {
-                // Try to auto-find again in case it was created later
                 gridGenerator = FindObjectOfType<GridGenerator3D>();
-            }
 
             if (gridGenerator != null)
             {
@@ -105,12 +101,13 @@ public class GameManager : MonoBehaviour
         Debug.Log("Wave 2 Starting");
         yield return StartCoroutine(HandleWave(dropAmountPerWave + 2, dropAmountPerWave));
         yield return StartCoroutine(WaitInterval(waveInterval));
+
         // After wave 2, spawn a treasure chest at a random remaining tile
         SpawnTreasureChest();
+
         // --- Wave 3 ---
         currentWave = 3;
         Debug.Log("Wave 3 Starting");
-        // Flash all remaining, leave only 2
         int tilesToDrop = activeTiles.Count - 2;
         if (tilesToDrop > 0)
         {
@@ -121,7 +118,6 @@ public class GameManager : MonoBehaviour
         // --- Wave 4 ---
         currentWave = 4;
         Debug.Log("Wave 4 Starting");
-        // Flash the last 2, drop 1
         if (activeTiles.Count > 1)
         {
             yield return StartCoroutine(HandleWave(activeTiles.Count, 1));
@@ -142,43 +138,44 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // 🔄 NEW: all tiles blink during warning, only subset collapses
     IEnumerator HandleWave(int tilesToFlashCount, int tilesToDropCount)
     {
-        // Sanity checks
+        if (activeTiles == null || activeTiles.Count == 0)
+            yield break;
+
+        // Clamp counts
         tilesToFlashCount = Mathf.Min(tilesToFlashCount, activeTiles.Count);
         tilesToDropCount = Mathf.Min(tilesToDropCount, tilesToFlashCount);
 
-        List<RockTile> tilesToFlash = GetRandomTiles(activeTiles, tilesToFlashCount);
-
-        // Pick subset of flashed tiles to drop
-        List<RockTile> tilesToDrop = GetRandomTiles(tilesToFlash, tilesToDropCount);
-
-        // 1. Warning Phase
-        foreach (var tile in tilesToFlash)
+        // 1. Warning Phase – flash *all* remaining tiles
+        foreach (var tile in activeTiles)
         {
             tile.SetWarning(true);
         }
 
-        // Count down warning duration
         float timer = warningDuration;
         while (timer > 0)
         {
             timer -= Time.deltaTime;
-            // Optionally flash timer red or show different visual?
             if (waveTimer != null) waveTimer.SetTime(timer);
             yield return null;
         }
 
-        // 2. Collapse Phase
-        foreach (var tile in tilesToFlash)
+        // Turn off warning visuals everywhere
+        foreach (var tile in activeTiles)
         {
-            tile.SetWarning(false); // Turn off warning visuals
+            tile.SetWarning(false);
+        }
 
-            if (tilesToDrop.Contains(tile))
-            {
-                tile.Collapse();
-                activeTiles.Remove(tile); // Remove from valid list
-            }
+        // 2. Collapse Phase – pick random subset to actually collapse
+        List<RockTile> tilesToFlash = GetRandomTiles(activeTiles, tilesToFlashCount);
+        List<RockTile> tilesToDrop = GetRandomTiles(tilesToFlash, tilesToDropCount);
+
+        foreach (var tile in tilesToDrop)
+        {
+            tile.Collapse();          // RockTile logic turns this into lava
+            activeTiles.Remove(tile); // no longer a safe brick
         }
     }
 

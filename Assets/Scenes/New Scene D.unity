@@ -2328,13 +2328,53 @@ PrefabInstance:
       value: BoardRoot
       objectReference: {fileID: 0}
     - target: {fileID: 5144125935127902997, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
+      propertyPath: rows
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5144125935127902997, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
+      propertyPath: columns
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5144125935127902997, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
+      propertyPath: squareSize
+      value: 0.45
+      objectReference: {fileID: 0}
+    - target: {fileID: 5144125935127902997, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
       propertyPath: floorSpawnPositions
       value: 
       objectReference: {fileID: 657502597}
+    - target: {fileID: 5144125935127902997, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
+      propertyPath: rockMaterial_Cracked
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: c475b5341b97ac042acd4a0b039fa40e, type: 3}
+    - target: {fileID: 5144125935127902997, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
+      propertyPath: rockMaterial_Uncracked
+      value: 
+      objectReference: {fileID: 2100000, guid: 6c870683247e10643acd3d99abadadfe, type: 2}
+    - target: {fileID: 5144125935127902997, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
+      propertyPath: rockMaterial_VergeOfCrumbling
+      value: 
+      objectReference: {fileID: 2100000, guid: 6c870683247e10643acd3d99abadadfe, type: 2}
     - target: {fileID: 5681067133127564368, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
       propertyPath: gridGenerator
       value: 
       objectReference: {fileID: 1961630896}
+    - target: {fileID: 5681067133127564368, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
+      propertyPath: treasureChestPrefab
+      value: 
+      objectReference: {fileID: 1000011713842796, guid: ffd3e66d4df2a554fb995d41f7ffe4c2, type: 3}
+    - target: {fileID: 8842454634096478287, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8842454634096478287, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8842454634096478287, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.8
+      objectReference: {fileID: 0}
     - target: {fileID: 8842454634096478287, guid: 042e0e2d1fdf8489aa7719968e80f628, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
