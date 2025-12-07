@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff976903056745e4a91c9e80168da284, type: 3}
+  m_Name: New Audio Library SO
+  m_EditorClassIdentifier: 
+  m_SfxClips:
+  - m_SFXType: 1
+    m_SFXAudioClip: {fileID: 0}
+  - m_SFXType: 2
+    m_SFXAudioClip: {fileID: 0}
+  - m_SFXType: 3
+    m_SFXAudioClip: {fileID: 0}
+  - m_SFXType: 4
+    m_SFXAudioClip: {fileID: 0}
+  - m_SFXType: 5
+    m_SFXAudioClip: {fileID: 0}
+  m_BgMusicClips:
+  - m_BGMusicType: 0
+    m_BGMusicClip: {fileID: 0}
+  - m_BGMusicType: 1
+    m_BGMusicClip: {fileID: 0}
