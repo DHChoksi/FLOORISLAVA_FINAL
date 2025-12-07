@@ -42,7 +42,7 @@ public class GridGenerator : MonoBehaviour
         }
     }
 
-void GenerateGrid()
+public void GenerateGrid()
 {
     float startX = -(columns / 2f) * squareSize;
     float startZ = -(rows / 2f) * squareSize;

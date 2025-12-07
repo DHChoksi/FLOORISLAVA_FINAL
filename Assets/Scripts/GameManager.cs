@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -7,8 +7,9 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    public GridGenerator gridGenerator;
-    
+    // CHANGED: use GridGenerator3D instead of GridGenerator
+    public GridGenerator3D gridGenerator;
+
     [Header("Wave Settings")]
     public float waveInterval = 5f; // Time between waves
     public float warningDuration = 3f; // How long tiles flash before dropping
@@ -16,7 +17,27 @@ public class GameManager : MonoBehaviour
     private int currentWave = 0;
     private List<RockTile> activeTiles;
 
-    public WaveTimer3D waveTimer;
+    public GameObject treasureChestPrefab; // Assign in Inspector
+    public WaveTimer3D waveTimer; // Reference to timer UI
+
+    // Spawn a treasure chest at a random remaining tile after wave 2
+    private void SpawnTreasureChest()
+    {
+        if (treasureChestPrefab == null)
+        {
+            Debug.LogWarning("Treasure chest prefab not assigned.");
+            return;
+        }
+        if (activeTiles == null || activeTiles.Count == 0)
+        {
+            Debug.LogWarning("No remaining tiles to spawn treasure chest.");
+            return;
+        }
+        // Pick a random tile from the remaining active rock tiles
+        var tile = activeTiles[Random.Range(0, activeTiles.Count)];
+        Vector3 spawnPos = tile.transform.position + Vector3.up * 0.5f; // slight offset above tile
+        Instantiate(treasureChestPrefab, spawnPos, Quaternion.identity);
+    }
 
     void Awake()
     {
@@ -27,7 +48,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         // Auto-find references if missing
-        if (gridGenerator == null) gridGenerator = FindObjectOfType<GridGenerator>();
+        if (gridGenerator == null) gridGenerator = FindObjectOfType<GridGenerator3D>();
         if (waveTimer == null) waveTimer = FindObjectOfType<WaveTimer3D>();
 
         StartCoroutine(GameLoop());
@@ -36,16 +57,38 @@ public class GameManager : MonoBehaviour
     IEnumerator GameLoop()
     {
         Debug.Log("GameLoop Started. Waiting for grid...");
-        // Wait for grid to initialize
-        yield return new WaitForSeconds(1f);
-        
-        activeTiles = gridGenerator.GetAllRockTiles();
-        Debug.Log($"GameManager found {activeTiles.Count} tiles.");
 
-        if (activeTiles.Count == 0)
+        // Wait until grid exists and has tiles, instead of fixed 1 second
+        float timeout = 15f;    // safety timeout (seconds)
+        float elapsed = 0f;
+
+        while (true)
         {
-            Debug.LogError("No tiles found! Wave System cannot start.");
-            yield break;
+            if (gridGenerator == null)
+            {
+                // Try to auto-find again in case it was created later
+                gridGenerator = FindObjectOfType<GridGenerator3D>();
+            }
+
+            if (gridGenerator != null)
+            {
+                var tiles = gridGenerator.GetAllRockTiles();
+                if (tiles != null && tiles.Count > 0)
+                {
+                    activeTiles = new List<RockTile>(tiles);
+                    Debug.Log($"GameManager found {activeTiles.Count} tiles.");
+                    break;
+                }
+            }
+
+            elapsed += Time.deltaTime;
+            if (elapsed >= timeout)
+            {
+                Debug.LogError("No tiles found after waiting for grid; Wave System cannot start.");
+                yield break;
+            }
+
+            yield return null;
         }
 
         int initialTileCount = activeTiles.Count;
@@ -62,7 +105,8 @@ public class GameManager : MonoBehaviour
         Debug.Log("Wave 2 Starting");
         yield return StartCoroutine(HandleWave(dropAmountPerWave + 2, dropAmountPerWave));
         yield return StartCoroutine(WaitInterval(waveInterval));
-
+        // After wave 2, spawn a treasure chest at a random remaining tile
+        SpawnTreasureChest();
         // --- Wave 3 ---
         currentWave = 3;
         Debug.Log("Wave 3 Starting");
@@ -105,7 +149,7 @@ public class GameManager : MonoBehaviour
         tilesToDropCount = Mathf.Min(tilesToDropCount, tilesToFlashCount);
 
         List<RockTile> tilesToFlash = GetRandomTiles(activeTiles, tilesToFlashCount);
-        
+
         // Pick subset of flashed tiles to drop
         List<RockTile> tilesToDrop = GetRandomTiles(tilesToFlash, tilesToDropCount);
 
@@ -129,7 +173,7 @@ public class GameManager : MonoBehaviour
         foreach (var tile in tilesToFlash)
         {
             tile.SetWarning(false); // Turn off warning visuals
-            
+
             if (tilesToDrop.Contains(tile))
             {
                 tile.Collapse();
